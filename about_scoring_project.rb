@@ -29,8 +29,82 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 #
 # Your goal is to write the score method.
 
+def build_dice_map(dice)
+    die_map = {}
+
+    set_index = 0
+
+    dice.each do |die|
+        # Somewhat counterintuitive, but returns true if fetch doesn't retrieve a
+        # matching index
+        if die_map.fetch(die, false) == false
+            # initiate an array at an index that matches the die value
+            die_map[die] = [[]]
+            # push the die value into the new array
+            die_map[die][0].push(die)
+        else
+            puts die_map.to_s
+            # Load another matching value
+            die_map[die][set_index].push(die)
+
+            if die_map[die][set_index].length > 2
+                set_index += 1
+                # push a new empty array
+                die_map[die].push([])
+            end
+        end
+    end
+    die_map
+end
+
+def set_is_all(set, num)
+    set.uniq == [num]
+end
+
+def set_is_all_ones(set)
+    set_is_all(set, 1)
+end
+
+def set_is_all_fives(set)
+    set_is_all(set, 5)
+end
+
+def set_is_all_same(set)
+    set_is_all(set, set[0])
+end
+
+def score_set(set)
+    score = 0
+    set.each do |v|
+        if v == 1
+            score = score + 100
+        elsif v == 5
+            score = score + 50
+        end
+    end
+    score
+end
+
 def score(dice)
-  # You need to write this method
+    score = 0
+    die_map = build_dice_map(dice)
+
+    die_map.each do |idx, die_roll_sets|
+        die_roll_sets.each do |die_roll_set|
+            if die_roll_set.length == 3
+                if set_is_all_ones(die_roll_set)
+                    score = score + 1000
+                elsif set_is_all_fives(die_roll_set)
+                    score = score + 500
+                elsif set_is_all_same(die_roll_set)
+                    score = score + die_roll_set[0] * 100
+                end
+            else
+                score = score + score_set(die_roll_set)
+            end
+        end
+    end
+    score
 end
 
 class AboutScoringProject < Neo::Koan
