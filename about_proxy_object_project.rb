@@ -12,13 +12,40 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 # missing handler and any other supporting methods.  The specification
 # of the Proxy class is given in the AboutProxyObjectProject koan.
 
+# This one really stumped me and I can't say that I understand what's happening
+# here. I finally cheated and looked up the answer here:
+# https://github.com/javierjulio/ruby-koans-completed/blob/master/about_proxy_object_project.rb
+#
+# This concept was not intuitive to me at all. :(
 class Proxy
+  attr_reader :messages
+
   def initialize(target_object)
     @object = target_object
-    # ADD MORE CODE HERE
+    @messages = []
   end
 
-  # WRITE CODE HERE
+  def called?(method_name)
+    @messages.include? method_name
+  end
+
+  def number_of_times_called(method_name)
+    @messages.count method_name
+  end
+
+  def method_missing(method_name, *args, &block)
+    if @object.respond_to? method_name then
+      # track each method called that target object can respond to
+      @messages.push method_name
+
+      # call the method!
+      @object.send method_name, *args
+    else
+      # all other cases: default behavior (raises NoMethodError)
+      super method_name, *args, &block
+    end
+  end
+
 end
 
 # The proxy object should pass the following Koan:
@@ -36,6 +63,12 @@ class AboutProxyObjectProject < Neo::Koan
   def test_tv_methods_still_perform_their_function
     tv = Proxy.new(Television.new)
 
+    # I think this is what threw me off. I expected the Proxy class to inherit
+    # the Television methods, but this test failed until I started catching
+    # messages. That doesn't make sense to me.
+    #
+    # I feel like this exercise is more about passing messages than grocking
+    # proxy objects
     tv.channel = 10
     tv.power
 

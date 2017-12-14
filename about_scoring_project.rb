@@ -43,7 +43,6 @@ def build_dice_map(dice)
             # push the die value into the new array
             die_map[die][0].push(die)
         else
-            puts die_map.to_s
             # Load another matching value
             die_map[die][set_index].push(die)
 
